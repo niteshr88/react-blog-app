@@ -1,7 +1,8 @@
 import { useState, useEffect  } from "react";
 import Alert from "./Alert";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import useAutoCloseAlert from "../Custom/useAutoCloseAlert";
+import { Navigate } from "react-router-dom";
 
 const AddBlog = () => {
     const { state } = useLocation();
@@ -18,7 +19,14 @@ const AddBlog = () => {
         AuthorName: '',
         ImageUpload: null
     });
+    
+    const userSession = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
+        if (userSession === null) {
+            return <Navigate to="/login" />;
+          }
+    // set input fields for edit
     useEffect(() => {
+        
         if (post) {
           setBlog({
             ID:post.id || null,
@@ -34,28 +42,39 @@ const AddBlog = () => {
     const navigate = useNavigate();
     
     const handleInput = (e) => {
+        debugger;
         setBlog({ ...blog, [e.target.name]: e.target.value });
     };
 
     const handleFileChange = (e) => {
-        setBlog({ ...blog, ImageUpload: e.target.files[0] });
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBlog(prevState => ({
+                    ...prevState,
+                    ImageBase64: reader.result.split(',')[1]
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = {
-            Title: blog.Title,
-            SubTitle: blog.SubTitle,
-            Description: blog.Description,
-            AuthorName: blog.AuthorName,
-            ImageUpload: blog.ImageUpload
-        };
+    debugger;
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("Title", blog.Title);
+    formData.append("SubTitle", blog.SubTitle);
+    formData.append("Description", blog.Description);
+    formData.append("AuthorName", blog.AuthorName);
+    formData.append("ImageUpload", blog.ImageUpload );
 
         const response = await fetch('https://localhost:44317/api/addblog', {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: formData,
             headers: {
-                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/json'
             }
         });
 
@@ -71,26 +90,27 @@ const AddBlog = () => {
                 ImageUpload: null
             })
         }
-
-        
+        else{
+            setSucess(false)
+        }
 
     }
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
-        const data = {
-            ID:blog.ID,
-            Title: blog.Title,
-            SubTitle: blog.SubTitle,
-            Description: blog.Description,
-            AuthorName: blog.AuthorName,
-            ImageUpload: blog.ImageUpload
-        };
+        const formData = new FormData();
+        formData.append("Title", blog.Title);
+        formData.append("SubTitle", blog.SubTitle);
+        formData.append("Description", blog.Description);
+        formData.append("AuthorName", blog.AuthorName);
+        formData.append("ImageUpload", blog.ImageUpload );
 
         const response = await fetch('https://localhost:44317/api/editblog', {
             method:'PUT',
-            body:JSON.stringify(data),
-            headers:{'Content-Type': 'application/json'}
+            body:formData,
+            headers:{
+                // 'Content-Type': 'application/json'
+            }
         });
 
         const result = await response.json();
@@ -119,12 +139,13 @@ const AddBlog = () => {
         navigate('/')
     }
 
+    useAutoCloseAlert(isSucess, setSucess, 5000)
+
     return (
         <div className="form-container max-w-2xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-lg">
-
-            {isSucess && <Alert msg={alertMessage} />}
-
-
+            {
+            isSucess && <Alert msg={alertMessage} txtcolor="text-green-700" bgcolor="bg-green-100" bgborder="border-green-400"/>
+            }
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New Blog</h2>
             <form onSubmit={handleFormSubmit}>
                 <div className="mb-4">
@@ -183,7 +204,7 @@ const AddBlog = () => {
                         name="ImageUpload"
                         id="ImageUpload"
                         className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                        onChange={handleFileChange}
+                        onChange={handleInput}
 
                     />
                 </div>

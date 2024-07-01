@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import parse from 'html-react-parser';
+import Alert from "./Alert";
+import useAutoCloseAlert from "../Custom/useAutoCloseAlert";
+import Pagination from "./Pagination ";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [postIdToDelete, setPostIdToDelete] = useState(null);
+  const [isDeleteSuccess, setDeleteSuccess] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("")
+  const [userRole, setUserRole] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 10; // For example, you can set this dynamically based on your data
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +22,8 @@ export default function Home() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        const userSession = JSON.parse(localStorage.getItem('UserRole') || sessionStorage.getItem('user'));
+        setUserRole(userSession)
         setPosts(data);
       })
       .catch((err) => {
@@ -69,8 +80,10 @@ export default function Home() {
 
       const result = await response.json();
       if (result.isSucess === "Success") {
-        alert(result.message);
+        // alert(result.message);
+        setAlertMessage(result.message)
         setPosts(posts.filter(post => post.id !== postIdToDelete));
+        setDeleteSuccess(true);
       } else {
         alert(`Failed to delete post: ${result.Message}`);
       }
@@ -82,9 +95,25 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (isDeleteSuccess) {
+      const timer = setTimeout(() => {
+        setDeleteSuccess(false);
+      }, 10000); // 10 seconds
 
+      return () => clearTimeout(timer);
+    }
+  }, [isDeleteSuccess]);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+  
   return (
     <>
+    {
+        isDeleteSuccess && <Alert msg={alertMessage} txtcolor="text-green-700" bgcolor="bg-green-100" bgborder="border-green-400" />
+    }
     <div className="w-full flex justify-center mt-6">
         <h1 className="text-4xl font-bold text-gray-800">Tech Blog</h1>
       </div>
@@ -120,7 +149,7 @@ export default function Home() {
             >
               Read More
             </button>
-            <div className="absolute bottom-0 right-0 m-2 space-x-2">
+          {userRole === 'Admin' &&  <div className="absolute bottom-0 right-0 m-2 space-x-2">
               <button
                 className="bg-blue-500 text-white px-2 py-1 rounded"
                 onClick={() => handleEdit(post)}
@@ -133,7 +162,7 @@ export default function Home() {
               >
                 Delete
               </button>
-            </div>
+            </div>}
           </div>
           
         </div>
@@ -170,7 +199,15 @@ export default function Home() {
     </div>
   </div>
 </div>}
-
+<Pagination
+currentPage={currentPage}
+totalPages={totalPages}
+onPageChange={handlePageChange}
+/>
+<div className="mt-4">
+        {/* Render your paginated content here */}
+        <p>Current Page: {currentPage}</p>
+      </div>
     </div>
     </>
   );

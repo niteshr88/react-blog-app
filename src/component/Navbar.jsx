@@ -47,6 +47,7 @@ export default function Navbar() {
         <ul className="nav-links flex flex-row justify-center gap-3">
           <li><Link className="navlink" to="/">Home</Link></li>
           <li><Link className="navlink" to="addblog">Add Blog</Link></li>
+          <li><Link className="navlink" to="slider">Slider</Link></li>
         </ul>
         <div className="flex-grow"></div>
         <div className="login-menu flex gap-3">

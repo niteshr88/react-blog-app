@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, json, useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -8,6 +8,7 @@ export default function LoginForm() {
     rememberMe: false
   });
   const [error, setError] = useState("");
+  const[isSuccess, setSuccess] = useState(false)
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -46,7 +47,8 @@ export default function LoginForm() {
         throw new Error(text);
       }
 
-      if (result[0].isSucess === "Success" && result[0].UserName !== '') {
+      if (result[0].isSucess === "Success" && result[0].userName !== '') {
+        setSuccess(false);
         const userData = {
           ...result,
           loginTime: new Date().getTime()
@@ -56,11 +58,14 @@ export default function LoginForm() {
           localStorage.setItem('user', JSON.stringify(userData[0].userName));
         } else {
           sessionStorage.setItem('user', JSON.stringify(userData[0].userName));
+          localStorage.setItem('UserRole',JSON.stringify(userData[0].role))
         }
 
         navigate('/');
       } else {
-        setError(result.message);
+        setSuccess(false);
+        console.log(result[0].message)
+        setError(result[0].message);
       }
     } catch (error) {
       setError(`Login failed: ${error.message}`);
@@ -72,7 +77,7 @@ export default function LoginForm() {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <form className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full" onSubmit={handleSubmit}>
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {!isSuccess && <div className="text-red-500 mb-4">{error}</div>}
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700">Email</label>
           <input

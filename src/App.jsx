@@ -6,6 +6,8 @@ import {BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ReadBlog from './component/ReadBlog';
 import SignupForm from './component/SignupForm';
 import LoginForm from './component/LoginForm';
+import Slideshow from './component/Slideshow';
+
 
 const RoutesConfig = () => {
   return(
@@ -13,6 +15,7 @@ const RoutesConfig = () => {
     <Route path="/" element={<Dashboard/>}>
     <Route index element={<Home/>}/>
     <Route path="readblog/:slug" element={<ReadBlog />} />
+    <Route path='slider' element={<Slideshow/>}/>
     </Route>
     <Route path="addblog" element={<AddBlog/>}/>
     <Route path="signup" element={<SignupForm/>}/>
