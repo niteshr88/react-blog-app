@@ -17,7 +17,7 @@ const AddBlog = () => {
         SubTitle: '',
         Description: '',
         AuthorName: '',
-        ImageUpload: null
+        ImageFile: null
     });
     
     const userSession = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
@@ -34,7 +34,7 @@ const AddBlog = () => {
             SubTitle: post.subTitle || "",
             Description: post.description || "",
             AuthorName: post.authorName || "",
-            ImageUpload: null, // You may need to handle image separately based on your application logic
+            ImageFile: null, // You may need to handle image separately based on your application logic
           });
           setEdit(true)
         }
@@ -49,14 +49,10 @@ const AddBlog = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setBlog(prevState => ({
-                    ...prevState,
-                    ImageBase64: reader.result.split(',')[1]
-                }));
-            };
-            reader.readAsDataURL(file);
+            setBlog(prevState => ({
+                ...prevState,
+                ImageFile: file // Store the file object directly
+            }));
         }
     };
 
@@ -68,8 +64,10 @@ const AddBlog = () => {
     formData.append("SubTitle", blog.SubTitle);
     formData.append("Description", blog.Description);
     formData.append("AuthorName", blog.AuthorName);
-    formData.append("ImageUpload", blog.ImageUpload );
-
+    formData.append("ImageFile", blog.ImageFile );
+    if (blog.ImageFile) {
+        formData.append("ImageFile", blog.ImageFile);
+    }
         const response = await fetch('https://localhost:44317/api/addblog', {
             method: 'POST',
             body: formData,
@@ -87,7 +85,7 @@ const AddBlog = () => {
                 SubTitle: '',
                 Description: '',
                 AuthorName: '',
-                ImageUpload: null
+                ImageFile: ''
             })
         }
         else{
@@ -98,12 +96,14 @@ const AddBlog = () => {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
+        debugger
         const formData = new FormData();
+        formData.append("ID", blog.ID)
         formData.append("Title", blog.Title);
         formData.append("SubTitle", blog.SubTitle);
         formData.append("Description", blog.Description);
         formData.append("AuthorName", blog.AuthorName);
-        formData.append("ImageUpload", blog.ImageUpload );
+        formData.append("ImageFile", blog.ImageFile );
 
         const response = await fetch('https://localhost:44317/api/editblog', {
             method:'PUT',
@@ -122,7 +122,7 @@ const AddBlog = () => {
                 SubTitle: '',
                 Description: '',
                 AuthorName: '',
-                ImageUpload: null
+                ImageFile: null
             })
         }
     }
@@ -198,13 +198,13 @@ const AddBlog = () => {
                     />
                 </div>
                 <div className="mb-6">
-                    <label htmlFor="ImageUpload" className="block text-sm font-medium text-gray-700">Upload Image</label>
+                    <label htmlFor="ImageFile" className="block text-sm font-medium text-gray-700">Upload Image</label>
                     <input
                         type="file"
-                        name="ImageUpload"
-                        id="ImageUpload"
+                        name="ImageFile"
+                        id="ImageFile"
                         className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                        onChange={handleInput}
+                        onChange={handleFileChange}
 
                     />
                 </div>

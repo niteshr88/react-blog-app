@@ -7,7 +7,11 @@ import ReadBlog from './component/ReadBlog';
 import SignupForm from './component/SignupForm';
 import LoginForm from './component/LoginForm';
 import Slideshow from './component/Slideshow';
-
+import Welcome from './component/Welcome';
+import useUserSession from './Custom/useUserSession';
+import {useDispatch} from 'react-redux'
+import { useEffect } from 'react';
+import { login, logout } from './store/authSlice';
 
 const RoutesConfig = () => {
   return(
@@ -20,11 +24,22 @@ const RoutesConfig = () => {
     <Route path="addblog" element={<AddBlog/>}/>
     <Route path="signup" element={<SignupForm/>}/>
     <Route path="login" element={<LoginForm/>}/>
+    <Route path='welcome/:slug' element={<Welcome/>}/>
   </Routes>
   )
 }
 function App() {
+const dispatch = useDispatch();
+const session = useUserSession();
 
+useEffect(() => {
+  if(session){
+    dispatch(login({userData: session}))
+  }
+  else{
+    dispatch(logout);
+  }
+}, [session, dispatch])
   return (
     <Router>
       <RoutesConfig />

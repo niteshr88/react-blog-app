@@ -15,7 +15,25 @@ export default function SignupForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
+    const data = {
+      FirstName:formData.firstName,
+      LastName:formData.lastName,
+      Email:formData.email,
+      Password:formData.password
+    }
+
+    try{
+      const response =  fetch('https://localhost:44317/api/',{
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    catch(excp){
+
+    }
   };
 
   return (

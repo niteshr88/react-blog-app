@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import parse from 'html-react-parser';
 import Alert from "./Alert";
 import useAutoCloseAlert from "../Custom/useAutoCloseAlert";
-import Pagination from "./Pagination ";
+import Pagination from "./Pagination";
+import Loader from "./Loader";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -14,6 +15,7 @@ export default function Home() {
   const [userRole, setUserRole] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 10; // For example, you can set this dynamically based on your data
+  const [loading, setLoading] = useState(true)
 
   const navigate = useNavigate();
 
@@ -21,13 +23,17 @@ export default function Home() {
     fetch("https://localhost:44317/api/getalblog")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        //console.log(data);
         const userSession = JSON.parse(localStorage.getItem('UserRole') || sessionStorage.getItem('user'));
         setUserRole(userSession)
         setPosts(data);
       })
       .catch((err) => {
         console.log(err);
+      })
+
+      .finally(() => {
+        setLoading(false); // Set loading to false after the fetch completes
       });
   }, []);
 
@@ -45,9 +51,10 @@ export default function Home() {
   };
 
   const getPreviewText = (text, wordLimit) => {
-    const words = text.split(" ");
+    debugger
+    const words = text.split("");
     if (words.length > wordLimit) {
-      return words.slice(0, wordLimit).join(" ") + "...";
+      return words.slice(0, wordLimit).join("") + "...";
     }
     return text;
   };
@@ -109,7 +116,7 @@ export default function Home() {
     setCurrentPage(pageNumber);
   };
   
-  return (
+  return !loading? (
     <>
     {
         isDeleteSuccess && <Alert msg={alertMessage} txtcolor="text-green-700" bgcolor="bg-green-100" bgborder="border-green-400" />
@@ -127,7 +134,7 @@ export default function Home() {
         >
           <div className="relative h-56 mx-4 -mt-6 overflow-hidden text-white shadow-lg bg-clip-border rounded-xl bg-blue-gray-500 shadow-blue-gray-500/40">
             <img
-              src="https://images.unsplash.com/photo-1540553016722-983e48a2cd10?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80"
+              src={`./public/${post.imagePath}`}
               alt="card-image"
             />
           </div>
@@ -199,16 +206,16 @@ export default function Home() {
     </div>
   </div>
 </div>}
-<Pagination
+{/* <Pagination
 currentPage={currentPage}
 totalPages={totalPages}
 onPageChange={handlePageChange}
-/>
-<div className="mt-4">
-        {/* Render your paginated content here */}
+/> */}
+{/* <div className="mt-4">
+        
         <p>Current Page: {currentPage}</p>
-      </div>
+      </div> */}
     </div>
     </>
-  );
+  ) : <div className=""><Loader/></div>;
 }

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../store/authSlice";
 
 const checkSession = () => {
   const sessionData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
@@ -22,6 +24,7 @@ const checkSession = () => {
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const sessionUser = checkSession();
@@ -29,6 +32,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
+    dispatch(logout)
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
     setUser(null);
@@ -47,7 +51,7 @@ export default function Navbar() {
         <ul className="nav-links flex flex-row justify-center gap-3">
           <li><Link className="navlink" to="/">Home</Link></li>
           <li><Link className="navlink" to="addblog">Add Blog</Link></li>
-          <li><Link className="navlink" to="slider">Slider</Link></li>
+          {/* <li><Link className="navlink" to="slider">Slider</Link></li> */}
         </ul>
         <div className="flex-grow"></div>
         <div className="login-menu flex gap-3">
